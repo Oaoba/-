@@ -5,7 +5,7 @@ from scipy.integrate import solve_ivp
 import time
 
 # ==============================================================================
-# 1. パラメータ定義 (factory.py ベース)
+# 1. パラメータ定義
 # ==============================================================================
 class Parameters:
     def __init__(self):
@@ -52,7 +52,7 @@ class Parameters:
         self.k_B_resp = 2.65e-7
 
 # ==============================================================================
-# 2. 物理モデル (factory.py ベース)
+# 2. 物理モデル 
 # ==============================================================================
 def plant_factory_model_TCB(t, x, u_MPC, u_I_vec, d_vec, p):
     T, C, B = x
@@ -101,7 +101,7 @@ def plant_factory_model_TCB(t, x, u_MPC, u_I_vec, d_vec, p):
     return [dTdt, dCdt, dBdt]
 
 # ==============================================================================
-# 3. 最適化用モデル (CasADi / factory.py ベース)
+# 3. 最適化用モデル (CasADi)
 # ==============================================================================
 def plant_factory_model_TCB_ca(x, u, d, p, I_k, phi_Q_LED_k):
     T, C, B = [x[i] for i in range(3)]
@@ -135,7 +135,7 @@ def plant_factory_model_TCB_ca(x, u, d, p, I_k, phi_Q_LED_k):
     return ca.vertcat(dTdt, dCdt, dBdt)
 
 # ==============================================================================
-# 4. MPCコントローラ (factory.py ベース: N=72, dt=300)
+# 4. MPCコントローラ (N=72, dt=300)
 # ==============================================================================
 class MPCController_CasADi_TCB:
     def __init__(self, params, N=72, dt=300):
@@ -289,7 +289,7 @@ def disturbance_function(t):
     return np.vstack([T_out, C_out]).T
 
 # ==============================================================================
-# 6. 電気代計算用 関数 (新規追加)
+# 6. 電気代計算用関数 
 # ==============================================================================
 def calculate_electricity_cost(u_hist, dt, p, final_fresh_weight):
     """
@@ -386,7 +386,6 @@ def main():
     mpc = MPCController_CasADi_TCB(p, N=36, dt=600) 
     
     # 初期状態: [Temp, CO2, Biomass]
-    # factory.pyに合わせ、ある程度制御しやすい初期値からスタート
     x_current = np.array([20.0, 0.0008, dry_start])
     t_current = 0.0
     
@@ -461,7 +460,7 @@ def main():
     print(f"  Final Weight : {final_fresh_weight:.4f} kg/m2")
     print("="*40)
     
-    # --- ★追加機能: 電気代計算 ---
+    # ---  電気代計算 ---
     # 加工前の u_hist_for_cost を渡すことで、シミュレーションステップと整合させる
     calculate_electricity_cost(u_hist_for_cost, mpc.dt, p, final_fresh_weight)
     
